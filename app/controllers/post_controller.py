@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.post_schema import PostCreate, PostOut
 from app.services.post_service import create_post_flow, publish_existing_post
+from app.services.trending_service import generate_trending_posts
+
 
 router = APIRouter(prefix="/api/posts", tags=["Posts"])
 
@@ -28,5 +30,13 @@ async def publish_post(post_id: int):
             raise HTTPException(status_code=500, detail="Failed to publish")
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/generate-trending")
+async def generate_trending_posts_endpoint(auto_post: bool = False):
+    try:
+        result = await generate_trending_posts(max_topics=5, auto_post=auto_post)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
